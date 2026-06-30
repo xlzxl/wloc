@@ -70,3 +70,7 @@ location-spoofer.js              # 核心脚本（四平台共用）
 location-spoofer-qx.js           # QX 专用
 location-spoofer-config.json     # 配置样板
 ```
+
+## 友情链接
+
+本项目接受 LINUX DO 社区佬友监督与反馈：[LINUX DO](https://linux.do)
