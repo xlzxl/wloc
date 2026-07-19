@@ -6,7 +6,9 @@
   "use strict";
 
   var DEFAULT_CONFIG = {
-    enabled: true,
+    // Stateless default: OFF until the picker writes coordinates to this device's own
+    // $prefs. "Nothing picked yet" then falls through to the real location.
+    enabled: false,
     latitude: 37.3349,
     longitude: -122.00902,
     horizontalAccuracy: 39,
@@ -332,7 +334,7 @@
     for (key in DEFAULT_CONFIG) { if (Object.prototype.hasOwnProperty.call(DEFAULT_CONFIG, key)) cfg[key] = DEFAULT_CONFIG[key]; }
     input = input || {};
     for (key in input) { if (Object.prototype.hasOwnProperty.call(input, key)) cfg[key] = input[key]; }
-    cfg.enabled = cfg.enabled !== false;
+    cfg.enabled = !(cfg.enabled === false || cfg.enabled === "false" || cfg.enabled === "0" || cfg.enabled === "off" || cfg.enabled === "no" || cfg.enabled === 0);
     cfg.latitude = Number(cfg.latitude); cfg.longitude = Number(cfg.longitude);
     cfg.horizontalAccuracy = Math.trunc(Number(cfg.horizontalAccuracy));
     cfg.verticalAccuracy = Math.trunc(Number(cfg.verticalAccuracy));
@@ -348,8 +350,18 @@
   }
 
   function loadConfig() {
-    // 仅使用内置默认配置，不发起任何外部网络请求
-    return normalizeConfig(DEFAULT_CONFIG);
+    // 无状态：从本机 $prefs 读取选点页写入的坐标（不发起任何外部网络请求）。
+    // 键与 location-settings.js 写入的一致：enabled/latitude/longitude/altitude/horizontalAccuracy/verticalAccuracy。
+    var cfg = {};
+    for (var k in DEFAULT_CONFIG) { if (Object.prototype.hasOwnProperty.call(DEFAULT_CONFIG, k)) cfg[k] = DEFAULT_CONFIG[k]; }
+    var keys = ["enabled", "latitude", "longitude", "altitude", "horizontalAccuracy", "verticalAccuracy"];
+    if (typeof $prefs !== "undefined" && $prefs.valueForKey) {
+      for (var i = 0; i < keys.length; i++) {
+        var v = $prefs.valueForKey(keys[i]);
+        if (v != null && v !== "") cfg[keys[i]] = v;
+      }
+    }
+    return normalizeConfig(cfg);
   }
 
   function mergeConfig(base, extra) {

@@ -10,7 +10,12 @@
   "use strict";
 
   var DEFAULT_CONFIG = {
-    enabled: true,
+    // Stateless default: OFF until a coordinate is written to the device's own
+    // $persistentStore (by the picker's save-interceptor) or enabled=true is passed
+    // as a module argument. This makes "nothing picked yet" fall through to the real
+    // location instead of the built-in Apple Park default. Stateful module manifests
+    // pass enabled=true explicitly to keep their always-on behavior.
+    enabled: false,
     mode: "response",
     latitude: 37.3349,
     longitude: -122.00902,
@@ -899,6 +904,8 @@
       "latitude",
       "longitude",
       "altitude",
+      "horizontalAccuracy",
+      "verticalAccuracy",
       "address",
       "configHost",
       "configToken",
